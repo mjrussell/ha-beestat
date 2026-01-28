@@ -19,6 +19,9 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
+          # We haven't set GitHub repo topics yet, and we don't publish a logo to the HA brands repo.
+          # Ignore these checks for now.
+          ignore: topics, brands
 
   lint-and-tests:
     runs-on: ubuntu-latest

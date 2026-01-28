@@ -1,7 +1,4 @@
 {
   "name": "Beestat",
-  "domains": ["binary_sensor", "sensor"],
-  "country": ["US"],
-  "render_readme": true,
-  "zip_release": false
+  "render_readme": true
 }
