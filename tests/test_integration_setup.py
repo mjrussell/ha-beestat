@@ -8,7 +8,7 @@ from homeassistant.helpers import entity_registry as er
 
 
 @pytest.mark.asyncio
-async def test_setup_creates_entities(hass, mock_config_entry):
+async def test_setup_creates_entities(hass, mock_config_entry, enable_custom_integrations):
     """Basic smoke test: integration sets up without throwing and registers sensors."""
 
     fake_thermostats = [
