@@ -8,6 +8,7 @@ from typing import Any
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
+    SensorEntityDescription,
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -34,24 +35,18 @@ from .data import (
 
 
 @dataclass(frozen=True)
-class BeestatSensorDescription:
+class BeestatSensorDescription(SensorEntityDescription):
     """Describe a Beestat sensor.
 
-    We intentionally include `suggested_unit_of_measurement` because Home Assistant's
-    SensorEntity base accesses it during entity add, even if we implement
-    `native_unit_of_measurement` ourselves.
+    We subclass HA's SensorEntityDescription so we automatically satisfy HA's
+    expected attributes (translation_key, entity_registry_* defaults, etc.).
+
+    We add our own callbacks for pulling values and dynamic units.
     """
 
-    key: str
-    name: str
-    device_class: SensorDeviceClass | None
-    state_class: SensorStateClass | None
-    unit_fn: Callable[[HomeAssistant], str | None]
-    value_fn: Callable[[dict[str, Any]], Any]
+    unit_fn: Callable[[HomeAssistant], str | None] = lambda _hass: None
+    value_fn: Callable[[dict[str, Any]], Any] = lambda _data: None
     optional: bool = False
-    suggested_unit_of_measurement: str | None = None
-    translation_key: str | None = None
-    entity_registry_enabled_default: bool = True
 
 
 SENSOR_DESCRIPTIONS: tuple[BeestatSensorDescription, ...] = (
