@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
-
 import pytest
 
 from homeassistant.helpers import entity_registry as er
 
+from custom_components.beestat.const import API_ENDPOINT
+
 
 @pytest.mark.asyncio
-async def test_setup_creates_entities(hass, mock_config_entry, enable_custom_integrations):
+async def test_setup_creates_entities(
+    hass, mock_config_entry, enable_custom_integrations, aioclient_mock
+):
     """Basic smoke test: integration sets up without throwing and registers sensors."""
 
     fake_thermostats = [
@@ -25,19 +27,16 @@ async def test_setup_creates_entities(hass, mock_config_entry, enable_custom_int
         }
     ]
 
-    with (
-        patch(
-            "custom_components.beestat.api.BeestatApiClient.async_validate_key",
-            new=AsyncMock(return_value=None),
-        ),
-        patch(
-            "custom_components.beestat.api.BeestatApiClient.request",
-            new=AsyncMock(return_value=fake_thermostats),
-        ),
-    ):
-        mock_config_entry.add_to_hass(hass)
-        assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
-        await hass.async_block_till_done()
+    # Mock Beestat API response (Beestat wraps payload as {success:true,data:...}).
+    aioclient_mock.post(
+        API_ENDPOINT,
+        json={"success": True, "data": fake_thermostats},
+        status=200,
+    )
+
+    mock_config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
 
     registry = er.async_get(hass)
     entities = [e for e in registry.entities.values() if e.platform == "beestat"]
