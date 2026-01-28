@@ -4,9 +4,9 @@
   "codeowners": ["@mjrussell"],
   "config_flow": true,
   "documentation": "https://github.com/mjrussell/ha-beestat",
-  "issue_tracker": "https://github.com/mjrussell/ha-beestat/issues",
   "integration_type": "device",
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/mjrussell/ha-beestat/issues",
   "requirements": [],
   "version": "0.1.0"
 }
