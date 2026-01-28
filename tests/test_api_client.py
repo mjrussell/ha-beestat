@@ -1,6 +1,6 @@
 from tests._load_module import load_module
 
-api = load_module("beestat_api", "custom_components/beestat/api.py")
+api = load_module("custom_components.beestat.api", "custom_components/beestat/api.py")
 
 
 def test_build_payload_includes_required_fields():

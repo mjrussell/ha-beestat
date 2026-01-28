@@ -1,6 +1,6 @@
 from tests._load_module import load_module
 
-data = load_module("beestat_data", "custom_components/beestat/data.py")
+data = load_module("custom_components.beestat.data", "custom_components/beestat/data.py")
 
 
 def test_pick_air_quality_prefers_runtime():
