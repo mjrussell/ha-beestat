@@ -27,4 +27,4 @@ jobs:
           ruff check .
       - name: Pytest
         run: |
-          pytest -q
+          PYTHONPATH=. pytest -q
