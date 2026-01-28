@@ -7,7 +7,6 @@
   "issue_tracker": "https://github.com/mjrussell/ha-beestat/issues",
   "integration_type": "device",
   "iot_class": "cloud_polling",
-  "platforms": ["binary_sensor", "sensor"],
   "requirements": [],
   "version": "0.1.0"
 }

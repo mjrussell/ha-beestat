@@ -34,9 +34,14 @@ class BeestatConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     @staticmethod
-    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> config_entries.OptionsFlow:
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> config_entries.OptionsFlow:
         return BeestatOptionsFlowHandler(config_entry)
-    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         errors: dict[str, str] = {}
 
         if user_input is not None:
