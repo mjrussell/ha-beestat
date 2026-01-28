@@ -11,6 +11,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: home-assistant/actions/hassfest@master
 
+  hacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: HACS validation
+        uses: hacs/action@main
+        with:
+          category: integration
+
   lint-and-tests:
     runs-on: ubuntu-latest
     steps:
@@ -21,12 +30,10 @@ jobs:
       - name: Install dev deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt || true  # homeassistant can have dependency conflicts, continue anyway
+          pip install -r requirements-dev.txt
       - name: Ruff
         run: |
           ruff check .
-      # Pytest is temporarily skipped due to homeassistant dependency complexity
-      # Uncomment when tests are refactored to avoid full homeassistant installation
-      # - name: Pytest
-      #   run: |
-      #     PYTHONPATH=. pytest -q
+      - name: Pytest
+        run: |
+          PYTHONPATH=. pytest -q

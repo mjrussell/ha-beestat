@@ -1,5 +1,5 @@
 pytest
+pytest-homeassistant-custom-component
 ruff
 aiohttp
-# homeassistant temporarily excluded (tests need refactoring to avoid full installation)
 
