@@ -50,7 +50,9 @@ class BeestatConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             try:
                 await _validate_api_key(self.hass, api_key)
-            except BeestatApiError:
+            except BeestatApiError as err:
+                # Note: HA's UI log viewer often hides DEBUG; log auth failures at WARNING so they show up.
+                _LOGGER.warning("Beestat API key validation failed: %s", err)
                 errors["base"] = "invalid_auth"
             except Exception:  # noqa: BLE001 - surfaced to user as unknown
                 _LOGGER.exception("Unexpected error validating Beestat API key")

@@ -53,6 +53,9 @@ class BeestatApiClient:
             async with self.session.post(API_ENDPOINT, json=payload) as resp:
                 if resp.status != 200:
                     text = await resp.text()
+                    self.logger.debug(
+                        "Beestat API non-200 response (status=%s) body=%s", resp.status, text
+                    )
                     raise BeestatApiError(f"HTTP {resp.status}: {text}")
                 data = await resp.json()
         except aiohttp.ClientError as err:
@@ -64,6 +67,15 @@ class BeestatApiClient:
             if data.get("error"):
                 raise BeestatApiError(str(data["error"]))
             if data.get("success") is False:
+                # Beestat error shape is typically: { success:false, data:{error_code,error_message,...} }
+                details = data.get("data")
+                if isinstance(details, dict):
+                    code = details.get("error_code")
+                    msg = details.get("error_message")
+                    if msg:
+                        raise BeestatApiError(
+                            f"{msg}" + (f" (code: {code})" if code is not None else "")
+                        )
                 message = data.get("error") or data.get("data") or "Beestat API returned success=false"
                 raise BeestatApiError(str(message))
             if "success" in data:
