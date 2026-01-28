@@ -35,7 +35,12 @@ from .data import (
 
 @dataclass(frozen=True)
 class BeestatSensorDescription:
-    """Describe a Beestat sensor."""
+    """Describe a Beestat sensor.
+
+    We intentionally include `suggested_unit_of_measurement` because Home Assistant's
+    SensorEntity base accesses it during entity add, even if we implement
+    `native_unit_of_measurement` ourselves.
+    """
 
     key: str
     name: str
@@ -44,6 +49,7 @@ class BeestatSensorDescription:
     unit_fn: Callable[[HomeAssistant], str | None]
     value_fn: Callable[[dict[str, Any]], Any]
     optional: bool = False
+    suggested_unit_of_measurement: str | None = None
 
 
 SENSOR_DESCRIPTIONS: tuple[BeestatSensorDescription, ...] = (
