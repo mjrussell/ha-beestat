@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Beestat",
+        "description": "Enter your Beestat API key.",
+        "data": {
+          "api_key": "API key"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid API key.",
+      "unknown": "Unexpected error."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Beestat",
+        "description": "Adjust the update interval.",
+        "data": {
+          "update_interval": "Update interval (minutes)"
+        }
+      }
+    }
+  }
+}
