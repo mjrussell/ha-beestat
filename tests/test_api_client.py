@@ -13,6 +13,6 @@ def test_build_payload_includes_required_fields():
     }
 
 
-def test_build_payload_defaults_arguments():
+def test_build_payload_omits_arguments_when_none():
     payload = api.build_payload("key123", "thermostat", "read", None)
-    assert payload["arguments"] == "{}"
+    assert "arguments" not in payload

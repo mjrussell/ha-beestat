@@ -20,13 +20,21 @@ def build_payload(
     method: str,
     arguments: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    """Build a Beestat API payload."""
-    return {
+    """Build a Beestat API payload.
+
+    Beestat expects `arguments` to be a JSON-encoded string *when provided*.
+    Omitting `arguments` entirely matches the behavior of our beestat-cli.
+    """
+    payload: dict[str, Any] = {
         "api_key": api_key,
         "resource": resource,
         "method": method,
-        "arguments": json.dumps(arguments or {}),
     }
+
+    if arguments is not None:
+        payload["arguments"] = json.dumps(arguments)
+
+    return payload
 
 
 @dataclass
@@ -65,12 +73,12 @@ class BeestatApiClient:
 
     async def async_get_thermostats(self) -> list[dict[str, Any]]:
         """Fetch thermostat data from Beestat."""
-        data = await self.request("thermostat", "read", {})
+        data = await self.request("thermostat", "read_id")
         return _normalize_thermostats(data)
 
     async def async_validate_key(self) -> None:
         """Validate the API key by attempting a lightweight call."""
-        await self.request("thermostat", "read", {})
+        await self.request("thermostat", "read_id")
 
 
 def _normalize_thermostats(data: Any) -> list[dict[str, Any]]:
