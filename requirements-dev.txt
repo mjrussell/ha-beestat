@@ -2,4 +2,5 @@ pytest
 pytest-homeassistant-custom-component
 ruff
 aiohttp
+freezegun
 
