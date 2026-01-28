@@ -31,7 +31,7 @@ async def test_setup_creates_entities(hass, mock_config_entry, enable_custom_int
             new=AsyncMock(return_value=None),
         ),
         patch(
-            "custom_components.beestat.api.BeestatApiClient.async_get_thermostats",
+            "custom_components.beestat.api.BeestatApiClient.request",
             new=AsyncMock(return_value=fake_thermostats),
         ),
     ):
