@@ -51,6 +51,7 @@ class BeestatSensorDescription:
     optional: bool = False
     suggested_unit_of_measurement: str | None = None
     translation_key: str | None = None
+    entity_registry_enabled_default: bool = True
 
 
 SENSOR_DESCRIPTIONS: tuple[BeestatSensorDescription, ...] = (
