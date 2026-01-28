@@ -1,7 +1,6 @@
 """Tests for the mock API client - standalone without HA dependencies."""
 from __future__ import annotations
 
-import asyncio
 import pytest
 
 from tests.mock_client import MockBeestatApiClient, BeestatApiError
