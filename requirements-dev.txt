@@ -1,4 +1,5 @@
 pytest
 ruff
 aiohttp
-homeassistant
+# homeassistant temporarily excluded (tests need refactoring to avoid full installation)
+
