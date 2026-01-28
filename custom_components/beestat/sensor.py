@@ -50,6 +50,7 @@ class BeestatSensorDescription:
     value_fn: Callable[[dict[str, Any]], Any]
     optional: bool = False
     suggested_unit_of_measurement: str | None = None
+    translation_key: str | None = None
 
 
 SENSOR_DESCRIPTIONS: tuple[BeestatSensorDescription, ...] = (
