@@ -8,6 +8,7 @@ from typing import Any
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
+    BinarySensorEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -31,13 +32,14 @@ from .data import (
 
 
 @dataclass(frozen=True)
-class BeestatBinarySensorDescription:
-    """Describe a Beestat binary sensor."""
+class BeestatBinarySensorDescription(BinarySensorEntityDescription):
+    """Describe a Beestat binary sensor.
 
-    key: str
-    name: str
-    device_class: BinarySensorDeviceClass | None
-    value_fn: Callable[[dict[str, Any]], bool | None]
+    We subclass HA's BinarySensorEntityDescription so HA has translation_key,
+    entity_registry_* defaults, etc.
+    """
+
+    value_fn: Callable[[dict[str, Any]], bool | None] = lambda _data: None
 
 
 BINARY_SENSOR_DESCRIPTIONS: tuple[BeestatBinarySensorDescription, ...] = (
