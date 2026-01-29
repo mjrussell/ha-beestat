@@ -45,7 +45,7 @@ class BeestatBinarySensorDescription(BinarySensorEntityDescription):
 BINARY_SENSOR_DESCRIPTIONS: tuple[BeestatBinarySensorDescription, ...] = (
     BeestatBinarySensorDescription(
         key="in_use",
-        name="In Comfort Profile",
+        name="In Use",
         device_class=None,
         value_fn=lambda sensor: remote_sensor_in_use(sensor),
     ),

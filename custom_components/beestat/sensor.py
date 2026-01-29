@@ -31,6 +31,7 @@ from .data import (
     remote_sensor_name,
     remote_sensor_temperature,
     thermostat_id,
+    thermostat_current_climate_name,
     thermostat_name,
 )
 
@@ -88,6 +89,15 @@ SENSOR_DESCRIPTIONS: tuple[BeestatSensorDescription, ...] = (
             "heat_setpoint",
             "heatSetpoint",
         ),
+        optional=True,
+    ),
+    BeestatSensorDescription(
+        key="current_comfort_profile",
+        name="Current Comfort Profile",
+        device_class=None,
+        state_class=None,
+        unit_fn=lambda _hass: None,
+        value_fn=lambda thermostat: thermostat_current_climate_name(thermostat),
         optional=True,
     ),
     BeestatSensorDescription(

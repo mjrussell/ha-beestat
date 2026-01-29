@@ -95,6 +95,33 @@ def thermostat_name(thermostat: dict[str, Any]) -> str:
     )
 
 
+def thermostat_current_climate_name(thermostat: dict[str, Any]) -> str | None:
+    """Return the current comfort profile/climate name (e.g. Home/Away/Sleep).
+
+    Ecobee exposes this via program.currentClimateRef, which references one of
+    program.climates[*].climateRef.
+    """
+    program = thermostat.get("program")
+    if not isinstance(program, dict):
+        return None
+
+    current_ref = program.get("currentClimateRef")
+    if not current_ref:
+        return None
+
+    climates = program.get("climates")
+    if not isinstance(climates, list):
+        return str(current_ref)
+
+    for climate in climates:
+        if not isinstance(climate, dict):
+            continue
+        if climate.get("climateRef") == current_ref:
+            return str(climate.get("name") or current_ref)
+
+    return str(current_ref)
+
+
 def find_thermostat(
     thermostats: list[dict[str, Any]],
     thermostat_identifier: str,
