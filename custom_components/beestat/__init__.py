@@ -60,6 +60,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 if isinstance(runtime, dict):
                     thermostat["runtime"] = runtime
 
+                remote_sensors = ecobee.get("remote_sensors")
+                if isinstance(remote_sensors, list):
+                    thermostat["remote_sensors"] = remote_sensors
+
         return thermostats
 
     update_minutes = entry.options.get(

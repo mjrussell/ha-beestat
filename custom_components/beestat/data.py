@@ -107,7 +107,12 @@ def find_thermostat(
 
 
 def extract_remote_sensors(thermostat: dict[str, Any]) -> list[dict[str, Any]]:
-    """Return a normalized list of remote sensor dicts from a thermostat payload."""
+    """Return a normalized list of remote sensor dicts from a thermostat payload.
+
+    Note: ecobee payloads often include a "remote_sensors" entry for the thermostat
+    itself (type="thermostat"). We filter those out since we already expose
+    thermostat-level entities separately.
+    """
     sensors: list[dict[str, Any]] = []
     for key in (
         "remoteSensors",
@@ -127,7 +132,14 @@ def extract_remote_sensors(thermostat: dict[str, Any]) -> list[dict[str, Any]]:
                 sensors.extend([item for item in nested_list if isinstance(item, dict)])
             elif all(isinstance(v, dict) for v in value.values()):
                 sensors.extend(list(value.values()))
-    return sensors
+
+    filtered: list[dict[str, Any]] = []
+    for sensor in sensors:
+        if str(sensor.get("type") or "").lower() == "thermostat":
+            continue
+        filtered.append(sensor)
+
+    return filtered
 
 
 def remote_sensor_id(sensor: dict[str, Any], thermostat_identifier: str) -> str:
