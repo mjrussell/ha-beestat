@@ -173,14 +173,29 @@ def remote_sensor_name(sensor: dict[str, Any]) -> str:
 
 
 def remote_sensor_temperature(sensor: dict[str, Any]) -> float | int | None:
-    """Return the remote sensor temperature if available."""
+    """Return the remote sensor temperature if available.
+
+    Ecobee remote sensor capability temperatures are typically reported as an
+    integer string in tenths of a degree Fahrenheit (e.g. "668" -> 66.8°F).
+    """
     value = _extract_remote_sensor_value(
         sensor,
         direct_keys=("temperature", "temp", "current_temperature"),
         nested_paths=(("data", "temperature"), ("runtime", "temperature")),
         capability_types=("temperature", "temp"),
     )
-    return _coerce_number(value)
+    num = _coerce_number(value)
+    if num is None:
+        return None
+
+    # Heuristic: values > 170 are almost certainly tenths-of-degree Fahrenheit.
+    # (Normal indoor temps are ~50-90F.)
+    if isinstance(num, int) and num > 170:
+        return num / 10
+    if isinstance(num, float) and num > 170:
+        return num / 10
+
+    return num
 
 
 def remote_sensor_humidity(sensor: dict[str, Any]) -> float | int | None:
