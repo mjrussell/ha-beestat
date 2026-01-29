@@ -142,6 +142,22 @@ def extract_remote_sensors(thermostat: dict[str, Any]) -> list[dict[str, Any]]:
     return filtered
 
 
+def extract_thermostat_sensor(thermostat: dict[str, Any]) -> dict[str, Any] | None:
+    """Return the ecobee "thermostat" sensor entry if present.
+
+    Ecobee includes the thermostat itself in `remote_sensors` with type="thermostat".
+    We use this for presence/occupancy + inUse, without treating it as a remote sensor device.
+    """
+    value = thermostat.get("remote_sensors")
+    if isinstance(value, list):
+        for item in value:
+            if not isinstance(item, dict):
+                continue
+            if str(item.get("type") or "").lower() == "thermostat":
+                return item
+    return None
+
+
 def remote_sensor_id(sensor: dict[str, Any], thermostat_identifier: str) -> str:
     """Return a stable remote sensor id string."""
     sensor_id = pick_first_value(
@@ -217,6 +233,15 @@ def remote_sensor_occupancy(sensor: dict[str, Any]) -> bool | None:
         nested_paths=(("data", "occupancy"), ("data", "presence")),
         capability_types=("occupancy", "presence", "occupied"),
     )
+    return _coerce_bool(value)
+
+
+def remote_sensor_in_use(sensor: dict[str, Any]) -> bool | None:
+    """Return whether the remote sensor is currently in use for comfort/profile.
+
+    Ecobee remote sensors include an `inUse` boolean.
+    """
+    value = pick_first_value(sensor, "inUse", "in_use")
     return _coerce_bool(value)
 
 
