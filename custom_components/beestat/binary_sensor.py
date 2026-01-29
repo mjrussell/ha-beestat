@@ -26,7 +26,9 @@ from .data import (
     remote_sensor_in_use,
     remote_sensor_name,
     remote_sensor_occupancy,
+    thermostat_fan_is_running,
     thermostat_id,
+    thermostat_is_in_hold,
     thermostat_name,
 )
 
@@ -57,6 +59,22 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[BeestatBinarySensorDescription, ...] = (
     ),
 )
 
+THERMOSTAT_BINARY_SENSOR_DESCRIPTIONS: tuple[BeestatBinarySensorDescription, ...] = (
+    *BINARY_SENSOR_DESCRIPTIONS,
+    BeestatBinarySensorDescription(
+        key="hold_active",
+        name="Hold Active",
+        device_class=None,
+        value_fn=lambda thermostat_sensor: thermostat_is_in_hold(thermostat_sensor),
+    ),
+    BeestatBinarySensorDescription(
+        key="fan_running",
+        name="Fan Running",
+        device_class=None,
+        value_fn=lambda thermostat_sensor: thermostat_fan_is_running(thermostat_sensor),
+    ),
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -71,8 +89,12 @@ async def async_setup_entry(
         # Thermostat-level presence / in-use (extracted from the ecobee "thermostat" sensor entry).
         thermostat_sensor = extract_thermostat_sensor(thermostat)
         if thermostat_sensor is not None:
-            for description in BINARY_SENSOR_DESCRIPTIONS:
-                if description.value_fn(thermostat_sensor) is None:
+            for description in THERMOSTAT_BINARY_SENSOR_DESCRIPTIONS:
+                # Some thermostat-level values come from the special thermostat remote_sensor
+                # entry (presence/in-use), others come from the thermostat dict itself (events).
+                source = thermostat_sensor if description.key in {"in_use", "occupancy"} else thermostat
+                value = description.value_fn(source)
+                if value is None:
                     continue
                 entities.append(
                     BeestatThermostatBinarySensor(
@@ -136,7 +158,9 @@ class BeestatThermostatBinarySensor(CoordinatorEntity, BinarySensorEntity):
         thermostat_sensor = extract_thermostat_sensor(thermostat)
         if thermostat_sensor is None:
             return None
-        return self.entity_description.value_fn(thermostat_sensor)
+
+        source = thermostat_sensor if self.entity_description.key in {"in_use", "occupancy"} else thermostat
+        return self.entity_description.value_fn(source)
 
 
 class BeestatRemoteBinarySensor(CoordinatorEntity, BinarySensorEntity):

@@ -185,6 +185,53 @@ def extract_thermostat_sensor(thermostat: dict[str, Any]) -> dict[str, Any] | No
     return None
 
 
+def thermostat_is_in_hold(thermostat: dict[str, Any]) -> bool | None:
+    """Return whether the thermostat currently has an active hold/override."""
+    events = thermostat.get("events")
+    if not isinstance(events, list):
+        return None
+    for e in events:
+        if not isinstance(e, dict):
+            continue
+        if str(e.get("type") or "").lower() == "hold" and bool(e.get("running")):
+            return True
+    return False
+
+
+def thermostat_fan_is_running(thermostat: dict[str, Any]) -> bool | None:
+    """Return whether the fan is currently running (best-effort).
+
+    Ecobee's detailed run state isn't always present in the Beestat payload.
+    We infer from:
+    - events[].fan / events[].fanSpeed when an event is running
+    - runtime.desiredFanMode (rarely indicates *running*, more of a setting)
+    - equipment_status if present
+    """
+    # 1) If a running event explicitly indicates fan
+    events = thermostat.get("events")
+    if isinstance(events, list):
+        for e in events:
+            if not isinstance(e, dict):
+                continue
+            if not bool(e.get("running")):
+                continue
+            fan = str(e.get("fan") or "").lower()
+            fan_speed = str(e.get("fanSpeed") or "").lower()
+            if fan in {"on", "minontime"}:
+                return True
+            if fan_speed not in {"", "off", "auto"}:
+                return True
+
+    # 2) Equipment status string/list
+    equip = thermostat.get("equipment_status") or thermostat.get("equipmentStatus")
+    if isinstance(equip, str):
+        return "fan" in equip.lower()
+    if isinstance(equip, list):
+        return any("fan" in str(x).lower() for x in equip)
+
+    return None
+
+
 def remote_sensor_id(sensor: dict[str, Any], thermostat_identifier: str) -> str:
     """Return a stable remote sensor id string.
 
