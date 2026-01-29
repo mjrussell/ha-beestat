@@ -84,9 +84,24 @@ class BeestatApiClient:
         return data
 
     async def async_get_thermostats(self) -> list[dict[str, Any]]:
-        """Fetch thermostat data from Beestat."""
+        """Fetch thermostat summary data from Beestat."""
         data = await self.request("thermostat", "read_id")
         return _normalize_thermostats(data)
+
+    async def async_get_ecobee_thermostats(self) -> dict[str, dict[str, Any]]:
+        """Fetch ecobee thermostat detail records (includes runtime with AQ fields)."""
+        data = await self.request("ecobee_thermostat", "read_id")
+        if isinstance(data, dict):
+            return {str(k): v for k, v in data.items() if isinstance(v, dict)}
+        return {}
+
+    async def async_sync_thermostats(self) -> None:
+        """Trigger Beestat thermostat sync."""
+        await self.request("thermostat", "sync")
+
+    async def async_sync_sensors(self) -> None:
+        """Trigger Beestat sensor sync."""
+        await self.request("sensor", "sync")
 
     async def async_validate_key(self) -> None:
         """Validate the API key by attempting a lightweight call."""

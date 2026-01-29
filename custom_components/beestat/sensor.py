@@ -17,6 +17,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import slugify
 
 from .const import DOMAIN
 from .data import (
@@ -237,6 +238,7 @@ class BeestatThermostatSensor(CoordinatorEntity, SensorEntity):
         self._thermostat_name = _thermostat_name(thermostat)
         self._hass = hass
         self._attr_unique_id = f"{self._thermostat_id}_{description.key}"
+        self._attr_suggested_object_id = f"beestat_{slugify(self._thermostat_name)}_{description.key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self._thermostat_id)},
             name=self._thermostat_name,
@@ -291,6 +293,7 @@ class BeestatRemoteSensor(CoordinatorEntity, SensorEntity):
         self._remote_sensor_name = remote_sensor_name(remote_sensor)
         self._hass = hass
         self._attr_unique_id = f"{self._remote_sensor_id}_{description.key}"
+        self._attr_suggested_object_id = f"beestat_{slugify(self._remote_sensor_name)}_{description.key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self._remote_sensor_id)},
             name=self._remote_sensor_name,

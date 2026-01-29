@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -27,13 +27,39 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     session = async_get_clientsession(hass)
     client = BeestatApiClient(entry.data[CONF_API_KEY], session, _LOGGER)
 
+    # Sync is heavier than polling. We poll frequently (default 5 min) but only
+    # request Beestat/ecobee sync on a slower cadence (default 1 hour).
+    sync_interval = timedelta(hours=1)
+
     async def _async_update_data():
         try:
+            now = datetime.now(timezone.utc)
+            last_sync: datetime | None = hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get("last_sync")
+            if last_sync is None or (now - last_sync) >= sync_interval:
+                _LOGGER.debug("Triggering Beestat sync (interval=%s)", sync_interval)
+                await client.async_sync_thermostats()
+                await client.async_sync_sensors()
+                hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {})["last_sync"] = now
+
             thermostats = await client.async_get_thermostats()
+            ecobee_thermostats = await client.async_get_ecobee_thermostats()
         except BeestatApiError as err:
             raise UpdateFailed(str(err)) from err
+
         if not thermostats:
             raise UpdateFailed("No thermostat data returned from Beestat API")
+
+        # Attach ecobee runtime (contains air quality fields) onto the thermostat dict.
+        for thermostat in thermostats:
+            ecobee_id = thermostat.get("ecobee_thermostat_id")
+            if ecobee_id is None:
+                continue
+            ecobee = ecobee_thermostats.get(str(ecobee_id))
+            if isinstance(ecobee, dict):
+                runtime = ecobee.get("runtime")
+                if isinstance(runtime, dict):
+                    thermostat["runtime"] = runtime
+
         return thermostats
 
     update_minutes = entry.options.get(
@@ -56,6 +82,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
         "client": client,
         "coordinator": coordinator,
+        "last_sync": hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get("last_sync"),
     }
 
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))
