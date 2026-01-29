@@ -33,7 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def _async_update_data():
         try:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc)  # noqa: UP017
             last_sync: datetime | None = hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get("last_sync")
             if last_sync is None or (now - last_sync) >= sync_interval:
                 _LOGGER.debug("Triggering Beestat sync (interval=%s)", sync_interval)
