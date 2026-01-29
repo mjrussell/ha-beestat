@@ -169,7 +169,9 @@ SENSOR_DESCRIPTIONS: tuple[BeestatSensorDescription, ...] = (
     BeestatSensorDescription(
         key="voc",
         name="VOC",
-        device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+        # Ecobee reports VOC in ppb; HA's VOC device class expects mass concentration.
+        # Keep this as a plain sensor with unit ppb.
+        device_class=None,
         state_class=SensorStateClass.MEASUREMENT,
         unit_fn=lambda _hass: "ppb",
         value_fn=lambda thermostat: pick_air_quality_value(

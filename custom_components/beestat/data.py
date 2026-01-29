@@ -159,7 +159,11 @@ def extract_thermostat_sensor(thermostat: dict[str, Any]) -> dict[str, Any] | No
 
 
 def remote_sensor_id(sensor: dict[str, Any], thermostat_identifier: str) -> str:
-    """Return a stable remote sensor id string."""
+    """Return a stable remote sensor id string.
+
+    Important: ecobee remote sensor ids are not guaranteed to be globally unique
+    across thermostats. We namespace by the parent thermostat id.
+    """
     sensor_id = pick_first_value(
         sensor,
         "id",
@@ -169,8 +173,8 @@ def remote_sensor_id(sensor: dict[str, Any], thermostat_identifier: str) -> str:
         "remoteSensorId",
     )
     if sensor_id is not None:
-        return str(sensor_id)
-    return f"{thermostat_identifier}_{remote_sensor_name(sensor)}"
+        return f"{thermostat_identifier}:{sensor_id}"
+    return f"{thermostat_identifier}:{remote_sensor_name(sensor)}"
 
 
 def remote_sensor_name(sensor: dict[str, Any]) -> str:
